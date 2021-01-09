@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Github Finder</string>
+    <string name="label_no_result">Data tidak ditemukan</string>
+    <string name="action_retry">Coba Lagi</string>
+</resources>

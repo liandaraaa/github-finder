@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/searchView"
+        android:elevation="@dimen/dimen_4dp"
+        android:layout_margin="@dimen/dimen_8dp"
+        android:background="@drawable/bg_rectangle_white_border_purple_radius_8"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="false"
+        app:iconifiedByDefault="false"/>
+
+    <com.lianda.githubfinder.utils.custom.CustomMultiStateView
+        android:id="@+id/msvUser"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:viewState="content"
+        app:loadingView="@layout/layout_loading"
+        app:emptyView="@layout/layout_dialog"
+        app:errorView="@layout/layout_dialog">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvUser"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="16dp"
+            android:clipToPadding="false" />
+
+    </com.lianda.githubfinder.utils.custom.CustomMultiStateView>
+
+
+</LinearLayout>
