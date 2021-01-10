@@ -2,17 +2,13 @@ package com.lianda.githubfinder.presentation.main
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.lianda.githubfinder.R
+import com.lianda.githubfinder.domain.model.EndlessUser
 import com.lianda.githubfinder.presentation.adapter.UserAdapter
 import com.lianda.githubfinder.presentation.viewmodel.UserViewModel
 import com.lianda.githubfinder.utils.common.ResultState
 import com.lianda.githubfinder.utils.custom.CustomEndlessGridLayoutManager
-import com.lianda.githubfinder.utils.extentions.showContentView
-import com.lianda.githubfinder.utils.extentions.showEmptyView
-import com.lianda.githubfinder.utils.extentions.showErrorView
-import com.lianda.githubfinder.utils.extentions.showLoadingView
+import com.lianda.githubfinder.utils.extentions.*
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -42,7 +38,7 @@ class MainActivity : AppCompatActivity(), UserAdapter.OnLoadMoreListener {
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-//                onQuerySubmitted(newText)
+                onQuerySubmitted(newText)
                 return false
             }
         })
@@ -55,6 +51,7 @@ class MainActivity : AppCompatActivity(), UserAdapter.OnLoadMoreListener {
     }
 
     private fun onQuerySubmitted(text: String?=null) {
+        userAdapter?.clear()
         if (text.isNullOrEmpty()) {
             currentPage = 1
             totalPages = 1
@@ -67,48 +64,55 @@ class MainActivity : AppCompatActivity(), UserAdapter.OnLoadMoreListener {
     }
 
     private fun observeUser() {
-        userViewModel.getUsers(query, currentPage).observe(this, {
-            when (it) {
-                is ResultState.Loading -> {
-                    msvUser.showLoadingView()
-                    isLoadMore = true
-                    userAdapter?.setLoadMoreProgress(true)
-                }
-                is ResultState.Empty -> {
-                    if (isLoadMore) {
-                        isLoadMore = false
-                        userAdapter?.setLoadMoreProgress(false)
-                        userAdapter?.removeScrollListener()
-                    } else {
-                        userAdapter?.clear()
-                        showEmptyView()
-                    }
-                }
-                is ResultState.Success -> {
-                    msvUser.showContentView()
+        observe(
+            liveData = userViewModel.getUsers(query,currentPage),
+            action = {
+                manageGetUserState(it)
+            }
+        )
+    }
+
+    private fun manageGetUserState(result:ResultState<EndlessUser>){
+        when (result) {
+            is ResultState.Loading -> {
+                msvUser.showLoadingView()
+                isLoadMore = true
+                userAdapter?.setLoadMoreProgress(true)
+            }
+            is ResultState.Empty -> {
+                if (isLoadMore) {
                     isLoadMore = false
                     userAdapter?.setLoadMoreProgress(false)
-                    totalPages = it.data.totalPage
-                    userAdapter?.totalPage = totalPages
-                    userAdapter?.notifyAddOrUpdateChanged(it.data.user)
-                }
-                is ResultState.Error -> {
-                    msvUser.showErrorView(
-                        icon = R.drawable.ic_sentiment_very_dissatisfied_primary_24dp,
-                        message = it.message,
-                        action = getString(R.string.action_retry),
-                        actionListener = {
-                            observeUser()
-                        }
-                    )
+                    userAdapter?.removeScrollListener()
+                } else {
+                    userAdapter?.clear()
+                    showEmptyView()
                 }
             }
-        })
+            is ResultState.Success -> {
+                msvUser.showContentView()
+                isLoadMore = false
+                userAdapter?.setLoadMoreProgress(false)
+                totalPages = result.data.totalPage
+                userAdapter?.totalPage = totalPages
+                userAdapter?.notifyAddOrUpdateChanged(result.data.user)
+            }
+            is ResultState.Error -> {
+                msvUser.showErrorView(
+                    icon = R.drawable.ic_error,
+                    message = result.message,
+                    action = getString(R.string.action_retry),
+                    actionListener = {
+                        observeUser()
+                    }
+                )
+            }
+        }
     }
 
     private fun showEmptyView() {
         msvUser.showEmptyView(
-            icon = R.drawable.ic_sentiment_dissatisfied_accent_24dp,
+            icon = R.drawable.ic_empty,
             message = getString(R.string.label_no_result)
         )
     }

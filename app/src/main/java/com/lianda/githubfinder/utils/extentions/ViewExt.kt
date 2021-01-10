@@ -33,7 +33,7 @@ fun ImageView.loadImage(url: String, progressBar: ProgressBar, placeHolder:Int? 
     progressBar.visible()
     Glide.with(context)
         .load(url)
-        .error(placeHolder ?: R.drawable.ic_sentiment_very_dissatisfied_primary_24dp)
+        .error(placeHolder ?: R.drawable.ic_sentiment_dissatisfied_accent_24dp)
         .listener(object : RequestListener<Drawable> {
             override fun onLoadFailed(
                 e: GlideException?,
@@ -42,6 +42,7 @@ fun ImageView.loadImage(url: String, progressBar: ProgressBar, placeHolder:Int? 
                 isFirstResource: Boolean
             ): Boolean {
                 progressBar.gone()
+                setImageResource(placeHolder ?: R.drawable.ic_sentiment_dissatisfied_accent_24dp)
                 return true
             }
 

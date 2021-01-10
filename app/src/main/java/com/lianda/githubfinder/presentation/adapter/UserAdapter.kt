@@ -6,25 +6,24 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.lianda.githubfinder.R
 import com.lianda.githubfinder.domain.model.User
-import kotlinx.android.synthetic.main.item_loading.view.*
+import com.lianda.githubfinder.utils.extentions.loadImage
 import kotlinx.android.synthetic.main.item_user.view.*
 
 class UserAdapter(
     private val context:Context,
-    val datas:MutableList<User>
+    private val data:MutableList<User>
 ):RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 
     companion object {
         const val VIEW_TYPE_ITEM = 0
         const val VIEW_TYPE_LOAD_MORE = 1
-        val LOAD_MORE_ITEM = User()
     }
 
     var page = 1
     var totalPage = 1
+    private val limitShimmerLoading = 4
 
     var isLoadMoreLoading = false
 
@@ -43,19 +42,24 @@ class UserAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (datas[position] != LOAD_MORE_ITEM) {
+        return if (!isLoadMoreLoading) {
             VIEW_TYPE_ITEM
         } else {
             VIEW_TYPE_LOAD_MORE
         }
     }
 
-    override fun getItemCount(): Int = datas.size
+    override fun getItemCount(): Int {
+     return  if (isLoadMoreLoading){
+         data.size + limitShimmerLoading
+     }  else{
+         data.size
+     }
+    }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when(holder){
-            is UserViewHolder -> holder.bind(datas[position])
-            is LoadMoreViewHolder -> holder.bind(datas[position])
+            is UserViewHolder -> holder.bind(data[position])
         }
     }
 
@@ -88,36 +92,28 @@ class UserAdapter(
 
     fun notifyAddOrUpdateChanged(newDatas: List<User>) {
         newDatas.forEach { data ->
-            if (!datas.contains(data)) {
-                datas.add(data)
+            if (!this.data.contains(data)) {
+                this.data.add(data)
             }
-
             notifyDataSetChanged()
         }
     }
 
     fun setLoadMoreProgress(isProgress: Boolean) {
         isLoadMoreLoading = isProgress
-        if (isProgress) {
-            datas.add(datas.size, LOAD_MORE_ITEM)
-        } else {
-            if (datas.size > 0) {
-                datas.remove(LOAD_MORE_ITEM)
-            }
-        }
         notifyDataSetChanged()
     }
 
 
     fun clear(){
-        datas.clear()
+        data.clear()
         notifyDataSetChanged()
     }
 
     inner class UserViewHolder(view:View):RecyclerView.ViewHolder(view){
         fun bind(user:User){
             with(itemView){
-                Glide.with(context).load(user.avatar).into(imgUser)
+                imgUser.loadImage(user.avatar,pbImage)
                 tvName.text = user.name
             }
         }
@@ -125,17 +121,7 @@ class UserAdapter(
 
     inner class LoadMoreViewHolder(
         view: View
-    ) : RecyclerView.ViewHolder(view) {
-        fun bind(data: User) {
-            with(itemView) {
-                if (isLoadMoreLoading) {
-                    pbLoading.visibility = View.VISIBLE
-                } else {
-                    pbLoading.visibility = View.GONE
-                }
-            }
-        }
-    }
+    ) : RecyclerView.ViewHolder(view) {}
 
     interface OnLoadMoreListener {
         fun onLoadMore()
