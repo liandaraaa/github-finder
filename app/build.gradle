@@ -23,10 +23,12 @@ android {
         debug{
             debuggable true
             buildConfigField("String", "BASE_URL", "\"https://api.github.com/\"")
+            buildConfigField("String", "ACCESS_TOKEN", "\"YOUR_PERSONAL_ACCESS_TOKEN\"")
         }
         release {
             minifyEnabled false
             buildConfigField("String", "BASE_URL", "\"https://api.github.com/\"")
+            buildConfigField("String", "ACCESS_TOKEN", "\"YOUR_PERSONAL_ACCESS_TOKEN\"")
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

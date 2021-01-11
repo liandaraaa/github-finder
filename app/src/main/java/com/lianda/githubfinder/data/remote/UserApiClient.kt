@@ -1,5 +1,6 @@
 package com.lianda.githubfinder.data.remote
 
+import com.lianda.githubfinder.BuildConfig
 import com.lianda.githubfinder.data.model.UserBaseResponse
 import retrofit2.Response
 import retrofit2.http.GET
@@ -10,6 +11,7 @@ interface UserApiClient {
     suspend fun getUsers(
         @Query("q") query: String,
         @Query("per_page") limit: Int = 10,
-        @Query("page") page: Int
+        @Query("page") page: Int,
+        @Query("access_token") token:String = BuildConfig.ACCESS_TOKEN
     ): Response<UserBaseResponse>
 }
