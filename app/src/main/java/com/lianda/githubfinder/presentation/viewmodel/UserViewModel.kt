@@ -20,7 +20,15 @@ class UserViewModel(private val repository: UserRepository):ViewModel() , UserUs
 
     override fun getUsers(query: String, page: Int): LiveData<ResultState<EndlessUser>> {
         viewModelScope.launch {
-            val userResponse = repository.getUsers(query, page)
+            var userResponse = repository.getUsers(query, page)
+            when(userResponse){
+                is ResultState.Success ->{
+                    if (userResponse.data.user.isEmpty()){
+                        userResponse = ResultState.Empty()
+                    }
+                }
+                else -> userResponse
+            }
             getUsers.value = userResponse
         }
         return getUsers
